@@ -42,7 +42,7 @@ static inline void* get_data(const void* m)
 
 static inline void ref_free(const void* m)
 {
-  ((ref_alloc_hdr*)m)->dealloc();
+  ((ref_alloc_hdr*)m)->dealloc(m);
 }
 
 static inline void ref_dec(ref_alloc_hdr* m)
@@ -114,7 +114,7 @@ void lm_override_dealloc(const void* m, void (*dealloc)(void*))
   get_ref_hdr(m)->dealloc = dealloc;
 }
 
-void _lm_priv_autorelease_callback(void **m)
+void _lm_priv_autorelease_callback(void *m)
 {
-  ref_dec(*m);
+  ref_dec(get_ref_hdr(*(void**)m));
 }

@@ -52,5 +52,5 @@ void lm_override_dealloc(const void* m, void (*dealloc)(void*));
   @attribute autorelease
   Autodecrement the reference count of this object as soon as it leaves scope
 */
-void _lm_priv_autorelease_callback(void **);
+void _lm_priv_autorelease_callback(void *);
 #define autorelease __attribute__((cleanup(_lm_priv_autorelease_callback)))
