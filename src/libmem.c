@@ -42,7 +42,11 @@ static inline void* get_data(const void* m)
 
 static inline void ref_free(const void* m)
 {
-  ((ref_alloc_hdr*)m)->dealloc(m);
+  if (((ref_alloc_hdr*)m)->dealloc != NULL)
+  {
+    ((ref_alloc_hdr*)m)->dealloc(get_data(m));
+  }
+  free(m);
 }
 
 static inline void ref_dec(ref_alloc_hdr* m)
@@ -66,9 +70,6 @@ void* lm_alloc(size_t sz)
   
   // set size
   ((ref_alloc_hdr*)r)->alloc_sz = sz;
-
-  // dealloc callback
-  ((ref_alloc_hdr*)r)->dealloc = free;
 
   // initial refcnt
   ref_inc((ref_alloc_hdr*)r);

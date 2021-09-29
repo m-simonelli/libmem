@@ -54,3 +54,4 @@ void lm_override_dealloc(const void* m, void (*dealloc)(void*));
 */
 void _lm_priv_autorelease_callback(void *);
 #define autorelease __attribute__((cleanup(_lm_priv_autorelease_callback)))
+ 
