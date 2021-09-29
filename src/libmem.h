@@ -40,3 +40,17 @@ void lm_retain(const void* m);
   0 after it is decreased, the chunk of memory will automatically be freed
 */
 void lm_release(const void* m);
+
+/*
+  @function lm_override_dealloc
+  Override the function to be called when the reference count reaches 0.
+  Useful in cases where further cleanup is required to deinit an object.
+*/
+void lm_override_dealloc(const void* m, void (*dealloc)(void*));
+
+/*
+  @attribute autorelease
+  Autodecrement the reference count of this object as soon as it leaves scope
+*/
+void _lm_priv_autorelease_callback(void **);
+#define autorelease __attribute__((cleanup(_lm_priv_autorelease_callback)))

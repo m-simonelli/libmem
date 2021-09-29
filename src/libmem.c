@@ -25,6 +25,7 @@ typedef struct
 {
   refcnt_t refcnt; // number of ownerships of this allocation
   size_t alloc_sz; // bytes allocated *not including this header*
+  void (*dealloc)();
 } ref_alloc_hdr;
 
 // takes a pointer to data, returns pointer to ref_alloc_hdr
@@ -41,7 +42,7 @@ static inline void* get_data(const void* m)
 
 static inline void ref_free(const void* m)
 {
-  free((void *)m);
+  ((ref_alloc_hdr*)m)->dealloc();
 }
 
 static inline void ref_dec(ref_alloc_hdr* m)
@@ -66,6 +67,9 @@ void* lm_alloc(size_t sz)
   // set size
   ((ref_alloc_hdr*)r)->alloc_sz = sz;
 
+  // dealloc callback
+  ((ref_alloc_hdr*)r)->dealloc = free;
+
   // initial refcnt
   ref_inc((ref_alloc_hdr*)r);
 
@@ -86,6 +90,9 @@ void* lm_copy(const void* m)
   // set size
   ((ref_alloc_hdr*)r)->alloc_sz = sz;
 
+  // dealloc callback
+  ((ref_alloc_hdr*)r)->dealloc = get_ref_hdr(m)->dealloc;
+
   // copy data
   memcpy(get_data(r), m, sz);
 
@@ -100,4 +107,14 @@ void lm_retain(const void* m)
 void lm_release(const void* m)
 {
   ref_dec(get_ref_hdr(m));
+}
+
+void lm_override_dealloc(const void* m, void (*dealloc)(void*))
+{
+  get_ref_hdr(m)->dealloc = dealloc;
+}
+
+void _lm_priv_autorelease_callback(void **m)
+{
+  ref_dec(*m);
 }
